@@ -1,14 +1,8 @@
-﻿#include "HelloWorldScene.h"
+#include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
 USING_NS_CC;
 using namespace CocosDenshion;
 using namespace std;
-
-#define REP(i, n) for (int i=0;i<n;++i)
-#define FOR(i, a, b) for (int i=a;i<b;++i)
-#define DWN(i, b, a) for (int i=b-1;i>=a;--i)
-typedef vector<int> VI;
-
 
 
 // 菜单
@@ -25,26 +19,6 @@ Scene* MainMenu::createScene()
 }
 
 
-
-
-void MainMenu::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event){
-
-	//CCLOG("Key with keycode %d pressed", keyCode);
-
-	if (keyCode == EventKeyboard::KeyCode::KEY_W){		
-		Fo->runAction(MoveBy::create(0.1, Vec2(0, 50) ));
-		SimpleAudioEngine::getInstance()->playEffect("sound/pinu_koke.wav");
-
-	}
-	else if (keyCode == EventKeyboard::KeyCode::KEY_S){				
-		Fo->runAction(MoveBy::create(0.1, Vec2(0, -50) ));
-		SimpleAudioEngine::getInstance()->playEffect("sound/pinu_koke.wav");
-	}
-	else if (keyCode == EventKeyboard::KeyCode::KEY_SPACE || keyCode == EventKeyboard::KeyCode::KEY_ENTER){
-		SimpleAudioEngine::getInstance()->playEffect("sound/2-69-se-2.wav");		
-	}
-}
-
 bool MainMenu::init()
 {
     //////////////////////////////
@@ -58,6 +32,7 @@ bool MainMenu::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     auto l1 = Label::createWithTTF("Start", "fonts/Marker Felt.ttf", 32);        
+    //l1->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height / 7*4));		
 	auto ll1 = MenuItemLabel::create(l1, CC_CALLBACK_1(MainMenu::menuCallbackStart, this));
 	ll1->setPosition(Vec2(0, -0));
 	ll1->setName("Start");
@@ -73,20 +48,7 @@ bool MainMenu::init()
 	ll3->setName("Exit");
     
 	auto menu = Menu::create(ll1, ll2, ll3, NULL);
-	addChild(menu);
-
-	focus = 0;
-
-	Fo = Label::createWithTTF("►", "fonts/Marker Felt.ttf", 32);	
-	Fo->setPosition(Vec2( origin.x + visibleSize.width / 2 - 80,  origin.y + visibleSize.height / 2));
-	Fo->setName("Focus");
-
-	addChild(Fo);
-
-	auto e = EventListenerKeyboard::create();
-	e->onKeyPressed = CC_CALLBACK_2(MainMenu::onKeyPressed, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(e, this);;
-
+	this->addChild(menu);
     return true;
 }
 
@@ -104,21 +66,23 @@ void MainMenu::menuCallbackExit(Ref* p)
 	Director::getInstance()->end();
 }
 
+
+
 void Puzzle::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event){
 
 	//CCLOG("Key with keycode %d pressed", keyCode);
 
 	if (keyCode == EventKeyboard::KeyCode::KEY_W){
-		if (blank % h != 0) Swap(blank, blank - 1); 
+		if (blank % 3 != 0) Swap(blank, blank - 1); 
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_S){
-		if ((blank + 1) % h != 0) Swap(blank, blank + 1);
+		if ((blank + 1) % 3 != 0) Swap(blank, blank + 1);
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_A){
-		if (blank + h < n) Swap(blank, blank + h);
+		if (blank + 3 < 9) Swap(blank, blank + 3);
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_D){		
-		if (blank - h >= 0) Swap(blank, blank - h);		
+		if (blank - 3 >= 0) Swap(blank, blank - 3);		
 		//Director::getInstance()->end();
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_SPACE){
@@ -127,53 +91,52 @@ void Puzzle::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event){
 }
 
 bool Puzzle::Done(){
-	for (int i = 0; i < n; ++i) if (A[i] != i) return 0;
+	for (int i = 0; i < 9; ++i) if (A[i] != i) return 0;
 	return 1;
 }
 
 void Puzzle::Swap(int a, int b){
-	blank = b;	
+	blank = b;
+	CCLOG("%d %d \n ", a, b); //blank = b;		
 	B[A[a]]->runAction(MoveTo::create(0.0, P[b]));
 	B[A[b]]->runAction(MoveTo::create(0.0, P[a]));
 	swap(A[a], A[b]);
 	
-	if (Done()){		
-		SimpleAudioEngine::getInstance()->playEffect("sound/傾僀僥儉1.wav");
-		//Director::getInstance()->end();
+	if (Done()){
+		Director::getInstance()->end();
 	}
+
 }
-
-
-int inversion(VI& A){ // 计算逆序对
-	int n = A.size();
-	int z = 0; REP(i, n) FOR(j, i+1, n) if (A[i] > A[j]) ++z;
-	return z;
-}
-
 
 bool Puzzle::init(){
 	if (!Layer::init()){
 		return false;
 	}
+	
+	int n = 0; A.resize(9); B.resize(9); P.resize(9);
 
-	w = 2, h = 2; n = w * h;
-	A.resize(n); B.resize(n); P.resize(n); blank = random()%n;	 REP(i, n) A[i] = i;
-	random_shuffle(A.begin(), A.end()); while (inversion(A) & 1) random_shuffle(A.begin(), A.end());
+	blank = random() % 9;
 
-	auto t = Sprite::create("pic.png");	
-	int ww = t->getContentSize().width / w;
-	int hh = t->getContentSize().height / h;	
+	for (int i = 0; i < 9; ++i) A[i] = i;
+	
+	random_shuffle(A.begin(), A.end());
 
-	for (int ii = 0; ii < n; ++ii){
-		int i = A[ii] / h, j = A[ii] % h, i2 = ii / h, j2 = ii % h;		
-		B[A[ii]] = blank == ii ? Sprite::create("black.png", Rect(0,0,1,1)) : Sprite::create("pic.png", Rect(i*ww, (h-1-j)*hh, ww, hh));							
-		B[A[ii]]->setPosition(Vec2(i2*(ww+2), j2*(hh+2))); addChild(B[A[ii]]);
-		P[ii] = B[ A[ii] ]->getPosition();		
+	for (int ii = 0; ii < 9; ++ii){
+		int i = A[ii] / 3, j = A[ii] % 3;		
+		int i2 = ii / 3, j2 = ii % 3;
+		int n = ii;
+		B[A[ii]] = blank == ii ? Sprite::create("black.png", Rect(0,0,150,150)) : Sprite::create("pic.png", Rect(i*150, (2-j)*150, 150, 150));							
+		B[A[ii]]->setPosition(Vec2(i2 * 152, j2 * 152)); addChild(B[A[ii]]);
+		P[ii] = B[ A[ii] ]->getPosition();
+		++n;
 	}
+
+
 
 	// ...
 	// .
 	// .
+
 		//监听键盘事件
 		auto e = EventListenerKeyboard::create();
 		e->onKeyPressed = CC_CALLBACK_2(Puzzle::onKeyPressed, this);
@@ -193,3 +156,7 @@ bool Game::init(){
 	addChild(t);
 	return true;
 }
+
+/*
+test git push
+*/

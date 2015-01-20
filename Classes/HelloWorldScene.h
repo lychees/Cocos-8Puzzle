@@ -10,32 +10,18 @@ USING_NS_CC;
 class MainMenu : public Layer
 {
 public:
-    
-	
-	static Scene* createScene();    
-	
+    static cocos2d::Scene* createScene();    
 	void menuCallbackStart(Ref*);
 	void menuCallbackOption(Ref*);
-	void menuCallbackExit(Ref*);	
-
-	int focus; Label* Fo;
-	void onKeyPressed(EventKeyboard::KeyCode, Event*);
-
-
+	void menuCallbackExit(Ref*);
 	CREATE_FUNC(MainMenu ); virtual bool init();
 };
 
 class Puzzle : public Layer{
 public:
-
-	int w, h, n;  // ¼ÇÂ¼¿íÓë¸ß·Ö¸îµÄ·İÊı¡£¡£¡£Ò»¹²ÓĞ¶àÉÙ¸ö¸ñ×Ó
-	int ww, hh; // ¼ÇÂ¼Ã¿¸ö¸ñ×ÓµÄ¿íÓë¸ß
-
-	vector<int> A; vector<Sprite*> B; // ¼ÇÂ¼Ã¿¸ö¸ñ×ÓÊÇÄÄÕÅÍ¼Æ¬¡£	
-
-
-	vector<Vec2> P; // Ã¿¸ö¸ñ×ÓµÄÊµ¼ÊÎ»ÖÃ¡£
-	int blank; // ¼ÇÂ¼¿Õ¸ñµÄÎ»ÖÃ
+	vector<int> A; vector<Sprite*> B; // è®°å½•æ¯ä¸ªæ ¼å­æ˜¯å“ªå¼ å›¾ç‰‡ã€‚	
+	vector<Vec2> P; // æ¯ä¸ªæ ¼å­çš„å®é™…ä½ç½®ã€‚
+	int blank; // è®°å½•ç©ºæ ¼çš„ä½ç½®
 	
 	void onKeyPressed(EventKeyboard::KeyCode, Event*);
 	bool Done();
@@ -47,10 +33,7 @@ public:
 class Game : public Scene{
 public:	
 	
-	void restart(); 
-	
-
-
+	void restart();
 	CREATE_FUNC(Game); virtual bool init();
 };
 
