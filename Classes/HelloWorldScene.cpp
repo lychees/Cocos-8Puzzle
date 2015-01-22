@@ -1,5 +1,6 @@
 ﻿#include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
+#include "ConvertUTF.h"
 USING_NS_CC;
 using namespace CocosDenshion;
 using namespace std;
@@ -31,17 +32,44 @@ void MainMenu::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event){
 
 	//CCLOG("Key with keycode %d pressed", keyCode);
 
-	if (keyCode == EventKeyboard::KeyCode::KEY_W){		
-		Fo->runAction(MoveBy::create(0.1, Vec2(0, 50) ));
-		SimpleAudioEngine::getInstance()->playEffect("sound/pinu_koke.wav");
+	if (keyCode == EventKeyboard::KeyCode::KEY_W){	
+		
+		if (point>1)
+		{
+			Fo->runAction(MoveBy::create(0.1, Vec2(0, 50) ));
+			SimpleAudioEngine::getInstance()->playEffect("sound/pinu_koke.wav");
+			point-=1;
+		}
+		
 
 	}
-	else if (keyCode == EventKeyboard::KeyCode::KEY_S){				
-		Fo->runAction(MoveBy::create(0.1, Vec2(0, -50) ));
-		SimpleAudioEngine::getInstance()->playEffect("sound/pinu_koke.wav");
+	else if (keyCode == EventKeyboard::KeyCode::KEY_S){
+		if (point<3)
+		{
+			Fo->runAction(MoveBy::create(0.1, Vec2(0, -50) ));
+			SimpleAudioEngine::getInstance()->playEffect("sound/pinu_koke.wav");
+			point+=1;
+		}
+		
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_SPACE || keyCode == EventKeyboard::KeyCode::KEY_ENTER){
+		
 		SimpleAudioEngine::getInstance()->playEffect("sound/2-69-se-2.wav");		
+		if (point==1)
+		{
+			SimpleAudioEngine::getInstance()->playEffect("sound/选择.wav");
+			Director::getInstance()->replaceScene(Game::create());
+		}
+		else
+			if (point==2)
+			{
+				
+			}
+			else
+				if(point==3)
+				{
+					Director::getInstance()->end();
+				}
 	}
 }
 
@@ -53,11 +81,12 @@ bool MainMenu::init()
     {
         return false;
     }
+
+	point = 1;
     
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-    auto l1 = Label::createWithTTF("Start", "fonts/Marker Felt.ttf", 32);        
+	auto l1 = Label::createWithTTF(   GBKToUTF8("Start 开始"), "fonts/Marker Felt.ttf", 32);        
 	auto ll1 = MenuItemLabel::create(l1, CC_CALLBACK_1(MainMenu::menuCallbackStart, this));
 	ll1->setPosition(Vec2(0, -0));
 	ll1->setName("Start");
@@ -77,7 +106,7 @@ bool MainMenu::init()
 
 	focus = 0;
 
-	Fo = Label::createWithTTF("►", "fonts/Marker Felt.ttf", 32);	
+	Fo = Label::createWithTTF("?", "fonts/Marker Felt.ttf", 32);	
 	Fo->setPosition(Vec2( origin.x + visibleSize.width / 2 - 80,  origin.y + visibleSize.height / 2));
 	Fo->setName("Focus");
 
@@ -93,6 +122,10 @@ bool MainMenu::init()
 void MainMenu::menuCallbackStart(Ref* p)
 {
 	//auto t = Game::create();
+
+	SimpleAudioEngine::getInstance()->playEffect("sound/选择.wav");
+
+
 	Director::getInstance()->replaceScene(Game::create());
 }
 void MainMenu::menuCallbackOption(Ref* p)
@@ -109,20 +142,38 @@ void Puzzle::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event){
 	//CCLOG("Key with keycode %d pressed", keyCode);
 
 	if (keyCode == EventKeyboard::KeyCode::KEY_W){
-		if (blank % h != 0) Swap(blank, blank - 1); 
+		if (blank % h != 0) 
+			{
+				Swap(blank, blank - 1);
+				SimpleAudioEngine::getInstance()->playEffect("sound/跳.wav");
+			}
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_S){
-		if ((blank + 1) % h != 0) Swap(blank, blank + 1);
+		if ((blank + 1) % h != 0) 
+		{
+			Swap(blank, blank + 1);
+			SimpleAudioEngine::getInstance()->playEffect("sound/跳.wav");
+		}
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_A){
-		if (blank + h < n) Swap(blank, blank + h);
+		if (blank + h < n) 		
+		{
+			Swap(blank, blank + h);
+			SimpleAudioEngine::getInstance()->playEffect("sound/跳.wav");
+		}
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_D){		
-		if (blank - h >= 0) Swap(blank, blank - h);		
+		if (blank - h >= 0) 	
+		{
+			Swap(blank, blank - h);
+			SimpleAudioEngine::getInstance()->playEffect("sound/跳.wav");
+		}
 		//Director::getInstance()->end();
 	}
 	else if (keyCode == EventKeyboard::KeyCode::KEY_SPACE){
-		Swap(0, 1);
+		{
+			SimpleAudioEngine::getInstance()->playEffect("sound/eat.wav");
+		}
 	}
 }
 
@@ -156,9 +207,17 @@ bool Puzzle::init(){
 		return false;
 	}
 
-	w = 2, h = 2; n = w * h;
+	w = 6, h = 6; 
+	
+	n = w * h;
 	A.resize(n); B.resize(n); P.resize(n); blank = random()%n;	 REP(i, n) A[i] = i;
-	random_shuffle(A.begin(), A.end()); while (inversion(A) & 1) random_shuffle(A.begin(), A.end());
+	
+	
+	random_shuffle(A.begin(), A.end()); 
+
+	// STL 
+	
+	while (inversion(A) & 1) random_shuffle(A.begin(), A.end());
 
 	auto t = Sprite::create("pic.png");	
 	int ww = t->getContentSize().width / w;

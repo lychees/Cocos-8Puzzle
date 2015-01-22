@@ -11,6 +11,7 @@ class MainMenu : public Layer
 {
 public:
     
+	int point;
 	
 	static Scene* createScene();    
 	
